@@ -1,12 +1,12 @@
 import tkinter as tk
 import xml.etree.ElementTree as ET
+import os.path as PATH
+import time
 # import lxml.etree as ET
 
 
 class InputContextEditor:
     def __init__(self, win):
-        # Initialize inputcontext file - should probably update to check in different directories steam/gog
-        self.inputcontextfile = 'inputContexts.xml'
         # Initialize the Disassemble time label and entry 
         self.lbl1 = tk.Label(win, text='Disassemble Time')
         self.lbl1.place(x=96, y=50)
@@ -25,6 +25,18 @@ class InputContextEditor:
         self.lbl3 = tk.Label(win, textvariable=self.statustext)
         self.lbl3.place(x=100, y=170)
 
+        # Initialize inputcontext file - should probably update to check in different directories steam/gog
+        contextfilename = 'inputContexts.xml'
+        steampath = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Cyberpunk 2077\\r6\\config\\'
+        gogpath = 'C:\\Program Files (x86)\\GOG Galaxy\\Games\\Cyberpunk 2077\\r6\\config\\'
+        if PATH.isfile(steampath + contextfilename):
+            self.inputcontextfile = steampath + contextfilename
+        elif PATH.isfile(gogpath + contextfilename):
+            self.inputcontextfile = gogpath + contextfilename
+        else:
+            self.updatestatus('Can\'t Find inputContexts.xml')
+            return
+        
         # Initialize the Status Message
         self.b1 = tk.Button(win, text='Update', command=self.update)
         self.b1.place(x=100, y=100, width=130)
@@ -69,7 +81,7 @@ class InputContextEditor:
 
         # If we have a set dtime/ctime - write the values - should update to self.inputcontextfile
         if dtime or ctime:
-            tree.write('inputContexts2.xml')
+            tree.write(self.inputcontextfile)
             statustext = 'Finished writing XML File'
         
         self.t1.delete(0, 'end')
