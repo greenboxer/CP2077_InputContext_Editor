@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 
 class InputContextEditor:
     def __init__(self, win):
-        # Initialize inputcontext file
+        # Initialize inputcontext file - should probably update to check in different directories steam/gog
         self.inputcontextfile = 'inputContexts.xml'
         # Initialize the Disassemble time label and entry 
         self.lbl1 = tk.Label(win, text='Disassemble Time')
@@ -32,26 +32,31 @@ class InputContextEditor:
         self.b2.place(x=100, y=125, width=130)
         self.parseXML(self.inputcontextfile)
 
+    # Just needed a method to refresh values
     def update(self):
         self.parseXML(self.inputcontextfile)
 
+    # Pulls the current input values for entries t1 and t2, then calls parseXML to write
     def writedata(self):
         disassemble_time = self.t1.get()
         craft_time = self.t2.get()
         self.parseXML(self.inputcontextfile,disassemble_time,craft_time)
-    
+
+    # Just in case we want to update the status text from anywhere and do other stuff
     def updatestatus(self,statustext):
         self.statustext.set(statustext)
 
-
+    # Parses the xml, without dtime and ctime input arguments, will simply read the xml file
     def parseXML(self, file, dtime=None,ctime=None):
+        # Sets custom parser to preserve xml file comments
         parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
+        
+        # Reads XML file, should probably set to try and except reading and break and have status message if error
         self.updatestatus('Reading XML File')
-        disassemble_time = 0
-        craft_time = 0
         tree = ET.parse(file,parser)
         statustext = 'Finished reading XML File'
 
+        # Reads the parsed XML to look for disassemble and craft item times.
         for node in tree.findall('hold'):
             if node.attrib['action'] == 'disassemble_item':
                 disassemble_time = node.attrib['timeout']
@@ -62,10 +67,10 @@ class InputContextEditor:
                 if ctime:
                     node.attrib['timeout'] = ctime
 
+        # If we have a set dtime/ctime - write the values - should update to self.inputcontextfile
         if dtime or ctime:
             tree.write('inputContexts2.xml')
             statustext = 'Finished writing XML File'
-
         
         self.t1.delete(0, 'end')
         self.t2.delete(0, 'end')
